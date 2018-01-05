@@ -4,7 +4,7 @@ class Heatmap {
 		this._height = height;
 		this._hexRadius = hexSize;
 		try {
-			if (this._width * this._height / this._hexRadius > 100000) throw 'to many hex elements to generate, set bigger hex size or smaller map size';
+			if (this._width * this._height / this._hexRadius > 100000) throw 'to many hex elements needs to be generated, set default value, set bigger hex size or smaller map size';
 		}
 		catch (err) {
 			console.error(err);
@@ -31,13 +31,54 @@ class Heatmap {
 			console.log(err);
 			this._heatColor = '#505090';
 		}
-
 		this._points = [];
+		this._heatingUpTime = 50;
+		this._coolingDownTime = 15000;
+		this._alowMouseEvents = false;
 
 		this._calculateHexCentersArr();
 
 		// delete after tests
 		this._info();
+	}
+
+	set toggleMouseEvents (value) {
+		try {
+			if(typeof(value) === 'boolean') {
+				this._alowMouseEvents = value;
+			} else {
+				throw 'toggle mouse value must be boolean'
+			}
+		}
+		catch (err) {
+			console.error(err);
+		}
+	}
+
+	set heatingUpTime (value) {
+		try {
+			if(!Number.isInteger(value)) {
+				throw 'cooling down time must be an integer [milliseconds]';
+			} else {
+				this._heatingUpTime = value;
+			}
+		}
+		catch (err) {
+			console.error(err);
+		}
+	}
+
+	set coolingDownTime (value) {
+		try {
+			if(!Number.isInteger(value)) {
+				throw 'cooling down time must be an integer [milliseconds]';
+			} else {
+				this._coolingDownTime = value;
+			}
+		}
+		catch (err) {
+			console.error(err);
+		}
 	}
 
 	create (id) {
@@ -50,25 +91,31 @@ class Heatmap {
 		const hexbin = d3.hexbin().radius(this._hexRadius);
 		const points = this._points;
 		const strokeColor = this._heatColor;
+		const mouseEvents = this._alowMouseEvents;
+		const heatingTime = this._heatingUpTime;
+		const coolingTime = this._coolingDownTime;
 
 		function heatUp (d) {
-			console.log(d, this);
-		  const el = d3.select(this)
-		    .transition()
-		    .duration(50)
-		    .style("fill-opacity", .3)
-		    .style("stroke-opacity", .3);
+			if(mouseEvents) {
+			  const el = d3.select(this)
+			    .transition()
+			    .duration(heatingTime)
+			    .style("fill-opacity", .3)
+			    .style("stroke-opacity", .3);
+			}
 		}
 
 		function coolDown (d) {
-		  const el = d3.select(this)
-		     .transition()
-		     .duration(15000)
-		     .style("fill-opacity", 0)
-		     .style("stroke-opacity", 0);
+			if(mouseEvents) {
+			  const el = d3.select(this)
+			     .transition()
+			     .duration(coolingTime)
+			     .style("fill-opacity", 0)
+			     .style("stroke-opacity", 0);
+			}
 		};
 
-		this._svg.append("g")
+		const hexMap = this._svg.append("g")
 		  .selectAll(".hexagon")
 		  .data(hexbin(points))
 		  .enter().append("path")
@@ -88,6 +135,33 @@ class Heatmap {
 			.on("mouseover", heatUp)
   		.on("mouseout", coolDown);
 
+  		// todo: figure out how to relate points with hexMap based on hexSize to target correct point by coordinates finds points index and set corresponding hexMap hexPoint heat.
+  		const fireHeatAtLocation = index =>
+  		{
+  			d3.select(hexMap[0][index])
+		    	.transition()
+		    		.duration(heatingTime)
+		    		.style("fill-opacity", .3)
+		    		.style("stroke-opacity", .3)
+		    	.transition()
+		     		.duration(coolingTime)
+		     		.style("fill-opacity", 0)
+		     		.style("stroke-opacity", 0);
+		   };
+
+  		console.log(hexMap[0][22]);
+
+  		let counter = 0;
+
+  		const looper = () => {
+  			if(counter < hexMap[0].length) {
+	  			setTimeout(() => {
+	  				fireHeatAtLocation(counter++);
+	  				looper();
+	  			},100);
+  			}
+  		};
+  		// looper();
 	}
 
 	_info () {
