@@ -1,13 +1,29 @@
-const data = [
-	{x: 10, y: 10},
-	{x: 20, y: 20},
-	{x: 30, y: 30},
-	{x: 40, y: 40},
-	{x: 50, y: 50},
-	{x: 60, y: 60}
-];
+const data = [];
 
-const heatmap = new Heatmap(120, 120, 8, {left: 10, right: 0, top: 10, bottom: 0}, '#ff0000', '#ffffff');
+const pathGenerator = quantity => {
+	for(let i = 0; i < quantity; ++i) {
+		const x = Math.floor(Math.random() * 800);
+		const y = Math.floor(Math.random() * 800);
+		data.push({x: x, y: y});
+	}
+}
+
+pathGenerator(1000);
+
+const heatmap = new Heatmap(800, 800, 12, {left: 12, right: 0, top: 12, bottom: 0}, '#ff0000', '#ffffff');
 heatmap.toggleMouseEvents = false;
+heatmap.coolingDownTime = 35000;
 heatmap.create('chart');
-heatmap.feedWithCoordinates(data);
+
+
+let index = 0;
+const looper = () => {
+	setTimeout(() => {
+		if (index < data.length) {
+			heatmap.feedWithCoordinates(data[index++]);
+			looper();
+		}
+	},100);
+}
+
+looper();
