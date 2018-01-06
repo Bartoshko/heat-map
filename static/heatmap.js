@@ -25,19 +25,19 @@ class Heatmap {
 		}
 
 		try {
-			if(heatColor.length < 7 || heatColor[0] !== '#') throw 'wrong value used for heat color';
+			if(heatColor.length < 7 || heatColor[0] !== '#') throw 'wrong value used for heat colour';
 			this._heatColor = heatColor;
 		}
 		catch(err) {
 			console.error(err);
 			this._heatColor = '#505090';
 		}
-		this._points = [];
 		this._heatingUpTime = 50;
 		this._coolingDownTime = 15000;
 		this._alowMouseEvents = false;
 
-		this._calculateHexCentersArr();
+		this._points = [];
+		this._calculatePoints();
 
 	}
 
@@ -83,14 +83,13 @@ class Heatmap {
 		  .enter().append("path")
 		  .attr("class", "hexagon")
 		  .attr("d", function (d) {
-		  	//todo : move calculating translation from hexRadius to the hex centre
 		  	hexGridTable.push({x: d.x, y: d.y});
 		  	return "M" + d.x + "," + d.y + hexbin.hexagon();
 			})
 		  .attr("stroke", function (d,i) {
 		  	return strokeColor;
 			})
-			.style("stroke-opacity", 1)
+			.style("stroke-opacity", 0)
 		  .attr("stroke-width", `${strokeWidth}px`)
 		  .style("fill", function (d,i) {
 		  	return points[i][2];
@@ -99,10 +98,37 @@ class Heatmap {
 			.on("mouseover", heatUp)
   		.on("mouseout", coolDown);
 
-  		console.log(this._points.length, this._hexMap[0].length, this._hexRadius);
-  		console.log(this._points, this._hexMap);
-  		console.log(this._hexMap[0][7]);
-  		console.log(hexGridTable);
+  		this._hexGridTable = hexGridTable;
+
+	}
+
+	feedWithCoordinates (data) {
+		const heatingTime = this._heatingUpTime;
+		const coolingTime = this._coolingDownTime;
+
+		const findHexIndex = coordinates => {
+			return this._hexGridTable.findIndex(hex => hex.x > coordinates.x && hex.y > coordinates.y);
+		}
+
+		const fireHeatAtLocation = index =>
+		{
+			d3.select(this._hexMap[0][index])
+	    	.transition()
+	    		.duration(heatingTime)
+	    		.style("fill-opacity", .3)
+	    		.style("stroke-opacity", .3)
+	    	.transition()
+	     		.duration(coolingTime)
+	     		.style("fill-opacity", 0)
+	     		.style("stroke-opacity", 0);
+	   }
+
+	  if (Array.isArray(data)) {
+			data.length < 20 ? data.forEach(arg => fireHeatAtLocation(findHexIndex(arg))) : data.slice(0, 19).forEach(arg => fireHeatAtLocation(findHexIndex(arg)));
+		} else {
+			fireHeatAtLocation(findHexIndex(data));
+		}
+
 	}
 
 	set toggleMouseEvents (value) {
@@ -144,42 +170,13 @@ class Heatmap {
 		}
 	}
 
-	set feedWithCoordinates (data) {
-		// todo: figure out how to relate points with hexMap based on hexSize to target correct point by coordinates finds points index and set corresponding hexMap hexPoint heat. this is cpu expensive so try to optimise as much as possible
-
-		const heatingTime = this._heatingUpTime;
-		const coolingTime = this._coolingDownTime;
-
-		const fireHeatAtLocation = index =>
-		{
-			d3.select(this._hexMap[0][index])
-	    	.transition()
-	    		.duration(heatingTime)
-	    		.style("fill-opacity", .3)
-	    		.style("stroke-opacity", .3)
-	    	.transition()
-	     		.duration(coolingTime)
-	     		.style("fill-opacity", 0)
-	     		.style("stroke-opacity", 0);
-	   }
-
-	   if (Array.isArray(data)) {
-			data.forEach(arg => console.log(arg));
-		} else {
-			console.log(data);
-		}
-
-		fireHeatAtLocation(7);
-
-	}
-
 	_calculateMap () {
 		const mapColumns = Math.ceil(this._width / (this._hexRadius * 1.5));
 		const mapRows = Math.ceil(this._height / (this._hexRadius * 1.5));
 		return [mapColumns, mapRows];
 	}
 
-	_calculateHexCentersArr () {
+	_calculatePoints () {
 		for (let i = 0; i < this._calculateMap()[1]; i++) {
     	for (let j = 0; j < this._calculateMap()[0]; j++) {
       	this._points.push([this._hexRadius * j * 1.5, this._hexRadius * i * 1.5, this._heatColor]);

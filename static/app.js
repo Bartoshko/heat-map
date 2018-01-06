@@ -10,4 +10,4 @@ const data = [
 const heatmap = new Heatmap(120, 120, 8, {left: 10, right: 0, top: 10, bottom: 0}, '#ff0000', '#ffffff');
 heatmap.toggleMouseEvents = false;
 heatmap.create('chart');
-heatmap.feedWithCoordinates = data;
+heatmap.feedWithCoordinates(data);

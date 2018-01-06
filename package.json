@@ -27,9 +27,5 @@
     "d3": "^4.12.2",
     "express": "^4.16.2",
     "nodemon": "^1.14.7"
-  },
-  "devDependencies": {
-    "jasmine": "^2.8.0",
-    "jasmine-node": "^1.14.5"
   }
 }
