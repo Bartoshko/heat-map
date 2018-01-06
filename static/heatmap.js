@@ -12,9 +12,6 @@ class Heatmap {
 		}
 		this._strokeWidth = 1;
 
-		this._hexSeparationX = Math.sqrt(3) * this._hexRadius + 2 * this._strokeWidth;
-		this._hexSeparationY = this._hexRadius + 2 * this._strokeWidth;
-
 		try {
 			if (!Number.isInteger(margin.left)) throw 'margin length wrongly specified';
 			if (!Number.isInteger(margin.right)) throw 'margin right wrongly specified';
@@ -32,7 +29,7 @@ class Heatmap {
 			this._heatColor = heatColor;
 		}
 		catch(err) {
-			console.log(err);
+			console.error(err);
 			this._heatColor = '#505090';
 		}
 		this._points = [];
@@ -42,17 +39,9 @@ class Heatmap {
 
 		this._calculateHexCentersArr();
 
-		// delete after tests
-		this._info();
 	}
 
 	create (id) {
-		this._svg = d3.select(`#${id}`).append("svg")
-			.attr("width", this._width + this._margin.left + this._margin.right)
-			.attr("height", this._height + this._margin.top + this._margin.bottom)
-			.append("g")
-			.attr("transform", "translate(" + this._margin.left + "," + this._margin.top + ")");
-
 		const hexbin = d3.hexbin().radius(this._hexRadius);
 		const points = this._points;
 		const strokeColor = this._heatColor;
@@ -60,6 +49,13 @@ class Heatmap {
 		const heatingTime = this._heatingUpTime;
 		const coolingTime = this._coolingDownTime;
 		const strokeWidth = this._strokeWidth;
+		const hexGridTable = [];
+
+		this._svg = d3.select(`#${id}`).append("svg")
+			.attr("width", this._width + this._margin.left + this._margin.right)
+			.attr("height", this._height + this._margin.top + this._margin.bottom)
+			.append("g")
+			.attr("transform", "translate(" + this._margin.left + "," + this._margin.top + ")");
 
 		function heatUp (d) {
 			if(mouseEvents) {
@@ -87,7 +83,9 @@ class Heatmap {
 		  .enter().append("path")
 		  .attr("class", "hexagon")
 		  .attr("d", function (d) {
-		  return "M" + d.x + "," + d.y + hexbin.hexagon();
+		  	//todo : move calculating translation from hexRadius to the hex centre
+		  	hexGridTable.push({x: d.x, y: d.y});
+		  	return "M" + d.x + "," + d.y + hexbin.hexagon();
 			})
 		  .attr("stroke", function (d,i) {
 		  	return strokeColor;
@@ -101,9 +99,10 @@ class Heatmap {
 			.on("mouseover", heatUp)
   		.on("mouseout", coolDown);
 
-  		console.log(this._points.length, this._hexMap[0].length);
-  		console.log(this._hexSeparationX + 2, this._hexRadius * 2 + 2);
-  		console.log(this._hexMap[0][29]);
+  		console.log(this._points.length, this._hexMap[0].length, this._hexRadius);
+  		console.log(this._points, this._hexMap);
+  		console.log(this._hexMap[0][7]);
+  		console.log(hexGridTable);
 	}
 
 	set toggleMouseEvents (value) {
@@ -146,7 +145,7 @@ class Heatmap {
 	}
 
 	set feedWithCoordinates (data) {
-		// todo: figure out how to relate points with hexMap based on hexSize to target correct point by coordinates finds points index and set corresponding hexMap hexPoint heat.
+		// todo: figure out how to relate points with hexMap based on hexSize to target correct point by coordinates finds points index and set corresponding hexMap hexPoint heat. this is cpu expensive so try to optimise as much as possible
 
 		const heatingTime = this._heatingUpTime;
 		const coolingTime = this._coolingDownTime;
@@ -170,26 +169,20 @@ class Heatmap {
 			console.log(data);
 		}
 
-		console.log(this._hexMap.size());
-		// fireHeatAtLocation(28);
-		// fireHeatAtLocation(29);
+		fireHeatAtLocation(7);
 
-	}
-
-	_info () {
-		console.log(this);
 	}
 
 	_calculateMap () {
-		const mapColumns = Math.floor(this._width / (this._hexRadius * 1.5));
-		const mapRows = Math.floor(this._height / (this._hexRadius * 1.5));
+		const mapColumns = Math.ceil(this._width / (this._hexRadius * 1.5));
+		const mapRows = Math.ceil(this._height / (this._hexRadius * 1.5));
 		return [mapColumns, mapRows];
 	}
 
 	_calculateHexCentersArr () {
 		for (let i = 0; i < this._calculateMap()[1]; i++) {
     	for (let j = 0; j < this._calculateMap()[0]; j++) {
-      	this._points.push([this._hexRadius * j *1.5, this._hexRadius * i * 1.5, this._heatColor]);
+      	this._points.push([this._hexRadius * j * 1.5, this._hexRadius * i * 1.5, this._heatColor]);
     	}
 		}
 	}
