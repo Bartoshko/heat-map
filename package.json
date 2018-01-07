@@ -1,13 +1,8 @@
 {
-  "name": "heatmap_test",
+  "name": "hexagon-heatmap-d3",
   "version": "1.0.0",
   "description": "bridge template to display heatmap based on given array of coordinates",
   "main": "index.js",
-  "scripts": {
-    "test": "./node_modules/.bin/jasmine-node ./static",
-    "run": "node index.js",
-    "dev": "nodemon index.js"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Bartoshko/heat-map.git"
@@ -15,7 +10,8 @@
   "keywords": [
     "heatmap",
     "d3js",
-    "csv"
+    "csv",
+    "hexagon"
   ],
   "author": "Bartoshko",
   "license": "MIT",
@@ -25,7 +21,6 @@
   "homepage": "https://github.com/Bartoshko/heat-map#readme",
   "dependencies": {
     "d3": "^4.12.2",
-    "express": "^4.16.2",
-    "nodemon": "^1.14.7"
+    "d3-hexbin": "^0.2.2"
   }
 }
