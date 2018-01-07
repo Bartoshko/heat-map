@@ -11,9 +11,9 @@
 */
 
 const d3 = require('d3');
-const d3.hexbin = require('d3-hexbin');
+d3.hexbin = require('d3-hexbin');
 
-module.exports = class Heatmap {
+module.export = class Heatmap {
 	constructor (width = 200, height = 200, hexSize = 5, margin = {left: 10, right: 10, top: 10, bottom: 10}, heatColor = '#ff0000') {
 		this._width = width;
 		this._height = height;
