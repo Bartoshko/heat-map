@@ -102,6 +102,6 @@ This is weekend fun project so do not expect to much from it, maybe I will find 
 
 Use and change as You wish.
 
-I am always happy to get a feedback or suggestions. [e-mail](lenart.consulting@gmail.com)
+I am always happy to get a feedback or suggestions. [e-mail](mailto:lenart.consulting@gmail.com)
 
 As always thx to My Flower.
