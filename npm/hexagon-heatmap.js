@@ -11,7 +11,7 @@
 */
 
 const d3 = require('d3');
-d3.hexbin = require('d3-hexbin');
+d3hexbin = require('d3-hexbin');
 
 module.export = class Heatmap {
 	constructor (width = 200, height = 200, hexSize = 5, margin = {left: 10, right: 10, top: 10, bottom: 10}, heatColor = '#ff0000') {
@@ -57,7 +57,7 @@ module.export = class Heatmap {
 	}
 
 	create (id) {
-		const hexbin = d3.hexbin().radius(this._hexRadius);
+		const hexbin = d3hexbin().radius(this._hexRadius);
 		const points = this._points;
 		const strokeColor = this._heatColor;
 		const mouseEvents = this._alowMouseEvents;

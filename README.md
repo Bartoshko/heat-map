@@ -27,7 +27,7 @@ next add heatmap.js to your script tag after above script tags:
 Open terminal and execute:
 
 ```
-npm install --save hexagon-heatmap
+in progress ...
 ```
 
 ### Usage:
